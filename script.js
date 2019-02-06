@@ -163,13 +163,13 @@ class Resolver {
 			return await this.setVideo(video);
 		}
 		
-		let results = await YouTube.search({
-			"q": this.input.value,
-			"publishedAfter": this.params.start.toISOString(),
-			"publishedBefore": this.params.end.toISOString(),
-			"part": "snippet",
-			"type": "video",
-		});
+		let query = new URLSearchParams();
+		query.set("q", this.input.value);
+		query.set("publishedAfter", this.params.start.toISOString());
+		query.set("publishedBefore", this.params.end.toISOString());
+		query.set("part", "snippet");
+		query.set("type", "video");
+		let results = await YouTube.search(query);
 		if(!results.items.length) {
 			this.preview.innerHTML = "No matching videos found";
 			throw Error("YouTube API found no matches");

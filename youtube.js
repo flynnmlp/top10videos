@@ -63,7 +63,10 @@ var YouTube = {
 			video = YouTube.videoCache.get(id);
 		}
 		if(!video) {
-			let result = await YouTube.get("videos", new URLSearchParams({id:id,part:"snippet"}));
+			let query = new URLSearchParams();
+			query.set("id", id);
+			query.set("part", "snippet");
+			let result = await YouTube.get("videos", query);
 			video = result.items[0];
 		}
 		if(!video)
