@@ -58,9 +58,9 @@ async function showTable(csvData, params) {
 		// YouTube's upload date is based on Californian timezone, which is either -08:00 (PDT) or -07:00 (PST)
 		// we give an extra hour to compensate for the DST change
 		let year = params.year, month = params.month;
-		params.start = new Date(`${year}-${month}-01T00:00:00.000-07:00`);
+		params.start = new Date(`${year}-${month.toString().padStart(2,"0")}-01T00:00:00.000-07:00`);
 		month++;if(month>12){month-=12;year++};
-		params.end   = new Date(`${year}-${month}-01T00:00:00.000-08:00`);
+		params.end   = new Date(`${year}-${month.toString().padStart(2,"0")}-01T00:00:00.000-08:00`);
 	}
 	
 	var table = $("#table");
