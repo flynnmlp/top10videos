@@ -1,0 +1,43 @@
+<!doctype HTML>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<title>YouTube Top 10 Videos</title>
+<script type="text/javascript" src="node_modules/fuse.js/dist/fuse.min.js"></script>
+<script type="text/javascript" src="node_modules/papaparse/papaparse.min.js"></script>
+<script type="text/javascript" src="youtube.js"></script>
+<script type="text/javascript" src="script.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+<div id="upload">
+Select CSV file: <input type="file" id="file"><br><br>
+or drop CSV file here.
+</div>
+
+<div id="parse_mode" style="display:none">
+	<fieldset>
+		<legend>
+			Monthly Top list
+		</legend>
+		Select month:
+		<input type="number" id="year"> / <input type="number" id="month" step="1" min="1" max="12">
+		<button id="monthly">Go</button>
+	</fieldset>
+	<fieldset>
+		<legend>
+			Yearly Top list
+		</legend>
+		Enter playlist url with possible videos: <br>
+		<input type="text" id="playlist" placeholder="https://www.youtube.com/playlist?list=PL...">
+		<button id="yearly">Go</button>
+	</fieldset>
+</div>
+
+<table id="table">
+</table>
+
+</body>
+</html>

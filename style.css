@@ -1,0 +1,59 @@
+#upload, #parse_mode {
+	border: 1px solid black;
+	padding: 2em;
+	width: 40em;
+	margin: 5em auto;
+}
+
+#year, #month {
+	width: 4.5em;
+	text-align: right;
+}
+
+#playlist {
+	width: 30em;
+}
+
+#table {
+	border-collapse: collapse;
+}
+#table td, #table th {
+	border: 1px solid black;
+	width: 160px;
+	vertical-align: top;
+}
+
+#table input {
+	box-sizing: border-box;
+	width: 160px;
+	transition: 200ms linear;
+	transition-property: margin width;
+}
+#table input:focus {
+	position: relative;
+	z-index: 1;
+	width: 400px;
+	margin-right: -240px;
+}
+
+td.init, td.error {
+	background-color: red;
+}
+td.resolving {
+	background-color: orange;
+}
+td.resolved {
+	background-color: #00FF00;
+}
+.preview img {
+	clip-path: inset(11px 0px);
+	margin: -11px auto;
+	display: block;
+}
+.preview h5 {
+	margin: 0;
+	white-space: nowrap;
+	max-width: 160px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
