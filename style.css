@@ -14,8 +14,20 @@
 	width: 30em;
 }
 
+#toolbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background: #CCC;
+	border-bottom: 1px solid black;
+	height: 32px;
+	z-index: 100;
+}
+
 #table {
 	border-collapse: collapse;
+	margin-top: 40px;
 }
 #table td, #table th {
 	border: 1px solid black;

@@ -5,12 +5,18 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <title>YouTube Top 10 Videos</title>
 <script type="text/javascript" src="dist/fuse.min.js"></script>
+<script type="text/javascript" src="dist/FileSaver.min.js"></script>
 <script type="text/javascript" src="dist/papaparse.min.js"></script>
 <script type="text/javascript" src="youtube.js"></script>
 <script type="text/javascript" src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+
+<div id="toolbar" style="display: none">
+	<button id="exportvotes">export all votes</button>
+	<button id="exportstats">export statistics</button>
+</div>
 
 <div id="upload">
 Select CSV file: <input type="file" id="file"><br><br>

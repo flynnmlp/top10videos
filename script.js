@@ -41,6 +41,15 @@ function onCSVParsed(results, file) {
 	});
 }
 
+function exportCSV(data, filename, options) {
+	let csv = Papa.unparse(data, options);
+	
+	var blob = new Blob([csv], {
+		type: "text/csv",
+	});
+	saveAs(blob, filename);
+}
+
 async function showTable(csvData, params) {
 	if(params.type == "yearly") {
 		var datalist = $("#datalist");
@@ -73,17 +82,26 @@ async function showTable(csvData, params) {
 	}
 	
 	let resolvers = [];
+	let submissions = [];
 	
-	for(let submission of csvData) {
-		let row = table.insertRow(-1);
+	for(let row of csvData) {
+		if(row.length<=1) continue;
 		
-		// Timestamp
-		let td = row.insertCell(-1);
-		td.textContent = submission.shift();
+		let tr = table.insertRow(-1);
 		
-		for(let cell of submission) {
-			let td = row.insertCell(-1);
-			resolvers.push(new Resolver(td, cell, params));
+		let submission = new Submission(tr, row.shift());
+		submissions.push(submission);
+		submission.onDelete = () => {
+			let index = submissions.indexOf(submission);
+			if(index > -1)
+				submissions.splice(index, 1);
+		};
+		
+		for(let cell of row) {
+			let td = tr.insertCell(-1);
+			let resolver = new Resolver(td, cell, params);
+			submission.addResolver(resolver);
+			resolvers.push(resolver);
 		}
 	}
 	
@@ -102,13 +120,120 @@ async function showTable(csvData, params) {
 		tasks.push(resolve());
 	
 	await Promise.all(tasks);
-	console.log("Done");
+	
+	$("#toolbar").style.display = "";
+	$("#exportvotes").onclick = async () => {
+		let rows = [];
+		for(let submission of submissions) {
+			let row1 = [submission.label];
+			let row2 = [""];
+			rows.push(row1, row2);
+			
+			for(let cell of submission.cells) {
+				if(cell.video && cell.video != NO_VIDEO) {
+					row1.push(cell.video.snippet.title);
+					row2.push("https://www.youtube.com/watch?v=" + cell.video.id);
+				} else {
+					row1.push("");
+					row2.push("");
+				}
+			}
+		}
+		
+		exportCSV(rows, "votes.csv");
+	};
+	
+	$("#exportstats").onclick = async () => {
+		let videos = new Map();
+		
+		for(let submission of submissions) {
+			submission.update();
+			
+			for(let id of submission.uniques) {
+				let count = videos.get(id);
+				if(!count)
+					count = 1
+				else
+					count++;
+				videos.set(id, count);
+			}
+		}
+		
+		let rows = await Promise.all(Array.from(videos.entries()).map(async ([id, votes]) => {
+			let item = YouTube.getVideo(id);
+			let query = new URLSearchParams();
+			query.set("id", id);
+			query.set("part", "statistics");
+			let stats = YouTube.get("videos", query);
+			item = await item;
+			stats = await stats;
+			
+			return {
+				title: item.snippet.title,
+				link: "https://www.youtube.com/watch?v=" + item.id,
+				channel: item.snippet.channelTitle,
+				views: parseInt(stats.items[0].statistics.viewCount),
+				votes,
+			};
+		}));
+		
+		rows.sort((a,b) => {
+			if(a.votes != b.votes) {
+				return b.votes - a.votes;
+			} else if(a.views != b.views) {
+				return b.views - a.views;
+			}
+			return a.title.localeCompare(b.title);
+		});
+		
+		exportCSV(rows, "stats.csv", {header:true});
+	};
+}
+
+class Submission {
+	constructor(tr, label) {
+		this.tr = tr;
+		this.cells = [];
+		this.label = label;
+		
+		// Timestamp
+		this.td = tr.insertCell(-1);
+		let div = this.td.appendChild(document.createElement("div"));
+		div.className = "timestamp";
+		div.textContent = label;
+		
+		let button = this.td.appendChild(document.createElement("button"));
+		button.textContent = "delete";
+		button.addEventListener("click", () => {
+			if(!confirm("Are you sure you want to delete this submission?"))
+				return;
+			
+			this.onDelete();
+			this.tr.parentNode.removeChild(tr);
+		});
+		
+		this.state = this.td.appendChild(document.createElement("div"));
+	}
+	
+	addResolver(resolver) {
+		this.cells.push(resolver);
+		resolver.onChange = () => this.update();
+	}
+	
+	update() {
+		this.videos = this.cells.filter(cell => cell.video && cell.video != NO_VIDEO).map(cell => cell.video.id);
+		this.uniques = new Set(this.videos);
+		
+		this.state.innerHTML = `${this.videos.length} video(s)<br>${this.uniques.size} unique video(s)`;
+	}
 }
 
 class Resolver {
 	constructor(td, text, params) {
 		this.td = td;
 		this.params = params;
+		
+		this.onChange = () => null;
 		
 		this.td.className = "init";
 		this.input = this.td.appendChild(document.createElement("input"));
@@ -133,6 +258,7 @@ class Resolver {
 			this.td.className = "";
 			this.video = NO_VIDEO;
 			this.preview.innerHTML = "";
+			this.onChange();
 			return;
 		}
 		
@@ -221,6 +347,7 @@ class Resolver {
 		link.href = "https://www.youtube.com/watch?v=" + this.video.id;
 		
 		this.td.className = "resolved";
+		this.onChange();
 	}
 }
 
